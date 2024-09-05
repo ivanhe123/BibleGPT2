@@ -21,7 +21,13 @@ def create_bpe_tokenizer(text_file):
     print(f"Vocabulary size: {vocab_size}")
     # Train the tokenizer
     trainer = trainers.BpeTrainer(vocab_size=vocab_size, special_tokens=["<s>", "<pad>", "</s>", "<unk>", "<mask>"])
+    tokenizer.eos_token = "</s>"
+    tokenizer.bos_token = "<s>"
+    tokenizer.unk_token = "<unk>"
+    tokenizer.pad_token = "<pad>"
+    tokenizer.mask_token = "<mask>"
     tokenizer.train_from_iterator([text], trainer)
+    return tokenizer
 if __name__ == "__main__":
     tokenizer=create_bpe_tokenizer("cleared.txt")
     # Save the tokenizer
