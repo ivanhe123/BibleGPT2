@@ -1,5 +1,6 @@
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, DataCollatorForLanguageModeling
 from transformers import Trainer, TrainingArguments
+from custom_bpe import create_bpe_tokenizer
 import torch
 import os
 import math
@@ -11,10 +12,8 @@ from datasets import load_dataset
 
 process_text.clean("GPT2-Architecture-Bible-main\Bible_KJV.txt")
 
-model,tokenizer = randmnize_null_gpt2.randomize("GPT2-Architecture-Bible-main/NullGPT2")
-
-# Set the padding token 
-tokenizer.pad_token = tokenizer.eos_token
+model = randmnize_null_gpt2.randomize("GPT2-Architecture-Bible-main/NullGPT2")
+tokenizer=create_bpe_tokenizer("cleared.txt")
 
 dataset = load_dataset('text', data_files={'train': 'cleared.txt'})
 def tokenize_function(examples):
