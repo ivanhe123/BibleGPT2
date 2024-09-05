@@ -1,9 +1,9 @@
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import GPT2LMHeadModel
+from custom_bpe import create_bpe_tokenizer
 import torch
 import os
 def randomize(model_name):
     model = GPT2LMHeadModel.from_pretrained(model_name)
-    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
     # Reset parameters
     for name, param in model.named_parameters():
@@ -11,7 +11,7 @@ def randomize(model_name):
             torch.nn.init.xavier_uniform_(param)
         else:
             torch.nn.init.zeros_(param)
-    return model, tokenizer
+    return model
 if __name__ == "__main__":
     model,tokenizer =randomize("gpt2-large-architecture")
     output_dir = "./gpt2-large-architecture"
