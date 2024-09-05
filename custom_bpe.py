@@ -1,34 +1,28 @@
-from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders, processors
 from collections import Counter
-
-# Initialize a tokenizer
-tokenizer = Tokenizer(models.BPE())
-
-# Customize pre-tokenization and post-processing
-tokenizer.pre_tokenizer = pre_tokenizers.Whitespace()
-tokenizer.decoder = decoders.ByteLevel()
-tokenizer.post_processor = processors.ByteLevel()
-def create_bpe_tokenizer(text_file):
-    # Load your text corpus
-    with open(text_file, "r", encoding="utf-8") as f:
-        text = f.read()
-    tokens = text.split()
-
-    # Count unique tokens
-    vocab = Counter(tokens)
-    vocab_size = len(vocab)
-
-    print(f"Vocabulary size: {vocab_size}")
-    # Train the tokenizer
-    trainer = trainers.BpeTrainer(vocab_size=vocab_size, special_tokens=["<s>", "<pad>", "</s>", "<unk>", "<mask>"])
-    tokenizer.eos_token = "</s>"
-    tokenizer.bos_token = "<s>"
-    tokenizer.unk_token = "<unk>"
-    tokenizer.pad_token = "<pad>"
-    tokenizer.mask_token = "<mask>"
-    tokenizer.train_from_iterator([text], trainer)
+import re
+from datasets import load_dataset
+from transformers import GPT2TokenizerFast, PreTrainedTokenizerFast
+def create_bpe_tokenizer(model,text_corpus):
+    # Initialize a tokenizer
+    tokenizer = GPT2TokenizerFast.from_pretrained(model)
+    
+    # Assuming your text corpus is in a text file
+    dataset = load_dataset('text', data_files={'train': text_corpus})
+    
+    with open(text_corpus, 'r', encoding='utf-8') as file:
+        text = file.read()
+    
+    # Simple tokenization (splitting by whitespace and punctuation)
+    tokens = re.findall(r'\b\w+\b', text.lower())
+    
+    token_counts = Counter(tokens)
+    unique_tokens = len(token_counts)
+    print(f"Number of unique tokens: {unique_tokens}")
+    
+    # Train the tokenizer on your dataset
+    tokenizer.train_new_from_iterator(dataset['train']['text'], vocab_size=unique_tokens)
     return tokenizer
 if __name__ == "__main__":
-    tokenizer=create_bpe_tokenizer("cleared.txt")
-    # Save the tokenizer
-    tokenizer.save("custom_bpe_tokenizer.json")
+    tokenizer = create_bpe_tokenizer("Inoob/NullGPT2", "cleared.txt")
+    tokenizer.save_pretrained('BibleArchitecture-Tokenizer')
+
